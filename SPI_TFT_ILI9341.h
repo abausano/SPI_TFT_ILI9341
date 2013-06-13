@@ -58,7 +58,7 @@
  *
  *
  * // the TFT is connected to SPI pin 5-7 
- * SPI_TFT_ILI9341 TFT(p5, p6, p7, p8, p15,"TFT"); // mosi, miso, sclk, cs, reset
+ * SPI_TFT_ILI9341 TFT(p5, p6, p7, p8, p9, p10,"TFT"); // mosi, miso, sclk, cs, reset, dc
  * 
  * int main() {
  *     TFT.claim(stdout);      // send stdout to the TFT display 
@@ -70,7 +70,6 @@
  *     TFT.set_font((unsigned char*) Arial12x12);  // select the font
  *     
  *     TFT.set_orientation(0);
- *     TFT.locate(0,0);
  *     printf("  Hello Mbed 0");
  *     TFT.set_font((unsigned char*) Arial24x23);  // select font 2
  *     TFT.locate(48,115);
@@ -81,12 +80,15 @@
  class SPI_TFT_ILI9341 : public GraphicsDisplay {
  public:
 
-  /** Create a SPI_TFT object connected to SPI and two pins
+  /** Create a SPI_TFT object connected to SPI and three pins
    *
-   * @param mosi,miso,sclk SPI
+   * @param mosi pin connected to SDO of display
+   * @param miso pin connected to SDI of display
+   * @param sclk pin connected to RS of display 
    * @param cs pin connected to CS of display
    * @param reset pin connected to RESET of display
-   *
+   * @param dc pin connected to WR of display
+   * the IM pins have to be set to 1110 (3-0) 
    */ 
   SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, const char* name ="TFT");
     

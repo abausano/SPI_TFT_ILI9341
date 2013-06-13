@@ -98,66 +98,165 @@ void SPI_TFT_ILI9341::wr_dat(unsigned char dat)
 
 
 
+// Init code based on MI0283QT datasheet
+
 void SPI_TFT_ILI9341::tft_reset()
 {
-    //static unsigned short driverCode;
     _spi.format(8,3);                 // 8 bit spi mode 3
-    _spi.frequency(12000000);          // 12 Mhz SPI clock
+    _spi.frequency(10000000);          // 10 Mhz SPI clock
     _cs = 1;                           // cs high
     _dc = 1;                           // dc high 
     _reset = 0;                        // display reset
 
     wait_us(50);
-    _reset = 1;                       // end reset
+    _reset = 1;                       // end hardware reset
     wait_ms(5);
+     
+    wr_cmd(0x01);                     // SW reset  
+    wait_ms(5);
+    wr_cmd(0x28);                     // display off  
 
     /* Start Initial Sequence ----------------------------------------------------*/
-     wr_cmd(0xCD);                     // Power Control A
+     wr_cmd(0xCF);                     
+     _spi.write(0x00);
+     _spi.write(0x83);
+     _spi.write(0x30);
+     _cs = 1;
+     
+     wr_cmd(0xED);                     
+     _spi.write(0x64);
+     _spi.write(0x03);
+     _spi.write(0x12);
+     _spi.write(0x81);
+     _cs = 1;
+     
+     wr_cmd(0xE8);                     
+     _spi.write(0x85);
+     _spi.write(0x01);
+     _spi.write(0x79);
+     _cs = 1;
+     
+     wr_cmd(0xCB);                     
      _spi.write(0x39);
      _spi.write(0x2C);
      _spi.write(0x00);
      _spi.write(0x34);
      _spi.write(0x02);
      _cs = 1;
-     
-     wr_cmd(0xCF);                     // Power Control B
+           
+     wr_cmd(0xF7);                     
+     _spi.write(0x20);
+     _cs = 1;
+           
+     wr_cmd(0xEA);                     
      _spi.write(0x00);
-     _spi.write(0xAA);
-     _spi.write(0xB0);
+     _spi.write(0x00);
      _cs = 1;
-     wr_cmd(0xF7);                     // CMD_PUMP_RATIO_CONTROL
-     _spi.write(0x30);
-     _cs = 1;
+     
      wr_cmd(0xC0);                     // POWER_CONTROL_1
-     _spi.write(0x25);
+     _spi.write(0x26);
      _cs = 1;
+ 
      wr_cmd(0xC1);                     // POWER_CONTROL_2
      _spi.write(0x11);
      _cs = 1;
+     
      wr_cmd(0xC5);                     // VCOM_CONTROL_1
-     _spi.write(0x5C);
-     _spi.write(0x4C);
+     _spi.write(0x35);
+     _spi.write(0x3E);
      _cs = 1;
+     
      wr_cmd(0xC7);                     // VCOM_CONTROL_2
-     _spi.write(0x94);
-     _cs = 1;   
-     wr_cmd(0xE8);                     // DRIVER_TIMING_CONTROL_A
-     _spi.write(0x85);
-     _spi.write(0x01);
-     _spi.write(0x78);
+     _spi.write(0xBE);
      _cs = 1; 
-     wr_cmd(0xEA);                     // DRIVER_TIMING_CONTROL_B
-     _spi.write(0x00);
-     _spi.write(0x00);
-     _cs = 1; 
-      wr_cmd(0x3A);                     // COLMOD_PIXEL_FORMAT_SET
-     _spi.write(0x05);
-     _cs = 1;
+     
      wr_cmd(0x36);                     // MEMORY_ACCESS_CONTROL
      _spi.write(0x48);
      _cs = 1; 
-    WindowMax ();
-}
+     
+     wr_cmd(0x3A);                     // COLMOD_PIXEL_FORMAT_SET
+     _spi.write(0x55);                 // 16 bit pixel 
+     _cs = 1;
+     
+     wr_cmd(0xB1);                     // Frame Rate
+     _spi.write(0x00);
+     _spi.write(0x1B);               
+     _cs = 1;
+     
+     wr_cmd(0xF2);                     // Gamma Function Disable
+     _spi.write(0x08);
+     _cs = 1; 
+     
+     wr_cmd(0x26);                     
+     _spi.write(0x01);                 // gamma set for curve 01/2/04/08
+     _cs = 1; 
+     
+     wr_cmd(0xE0);                     // positive gamma correction
+     _spi.write(0x1F); 
+     _spi.write(0x1A); 
+     _spi.write(0x18); 
+     _spi.write(0x0A); 
+     _spi.write(0x0F); 
+     _spi.write(0x06); 
+     _spi.write(0x45); 
+     _spi.write(0x87); 
+     _spi.write(0x32); 
+     _spi.write(0x0A); 
+     _spi.write(0x07); 
+     _spi.write(0x02); 
+     _spi.write(0x07);
+     _spi.write(0x05); 
+     _spi.write(0x00);
+     _cs = 1;
+     
+     wr_cmd(0xE1);                     // negativ gamma correction
+     _spi.write(0x00); 
+     _spi.write(0x25); 
+     _spi.write(0x27); 
+     _spi.write(0x05); 
+     _spi.write(0x10); 
+     _spi.write(0x09); 
+     _spi.write(0x3A); 
+     _spi.write(0x78); 
+     _spi.write(0x4D); 
+     _spi.write(0x05); 
+     _spi.write(0x18); 
+     _spi.write(0x0D); 
+     _spi.write(0x38);
+     _spi.write(0x3A); 
+     _spi.write(0x1F);
+     _cs = 1;
+     
+     WindowMax ();
+     
+     //wr_cmd(0x34);                     // tearing effect off
+     //_cs = 1;
+     
+     //wr_cmd(0x35);                     // tearing effect on
+     //_cs = 1;
+      
+     wr_cmd(0xB7);                       // entry mode
+     _spi.write(0x07);
+     _cs = 1;
+     
+     wr_cmd(0xB6);                       // display function control
+     _spi.write(0x0A);
+     _spi.write(0x82);
+     _spi.write(0x27);
+     _spi.write(0x00);
+     _cs = 1;
+     
+     wr_cmd(0x11);                     // sleep out
+     _cs = 1;
+     
+     wait_ms(100);
+     
+     wr_cmd(0x29);                     // display on
+     _cs = 1;
+     
+     wait_ms(100);
+     
+ }
 
 
 void SPI_TFT_ILI9341::pixel(int x, int y, int color)
