@@ -11,6 +11,7 @@
  */
  
 // 12.06.13 fork from SPI_TFT code because controller is different ...
+// 14.07.13 Test with real display and bugfix 
 
 #include "SPI_TFT_ILI9341.h"
 #include "mbed.h"
@@ -43,25 +44,27 @@ int SPI_TFT_ILI9341::height()
 }
 
 
-/*void SPI_TFT_ILI9341::set_orientation(unsigned int o)
+void SPI_TFT_ILI9341::set_orientation(unsigned int o)
 {
     orientation = o;
+    wr_cmd(0x36);                     // MEMORY_ACCESS_CONTROL
     switch (orientation) {
         case 0:
-            wr_reg(0x16, 0x08);
+            _spi.write(0x48);
             break;
         case 1:
-            wr_reg(0x16, 0x68);
+            _spi.write(0x28);
             break;
         case 2:
-            wr_reg(0x16, 0xC8);
+            _spi.write(0x88);
             break;
         case 3:
-            wr_reg(0x16, 0xA8);
+            _spi.write(0xE8);
             break;
     }
+    _cs = 1; 
     WindowMax();
-} */
+} 
 
 
 // write command to tft register
@@ -79,7 +82,6 @@ void SPI_TFT_ILI9341::wr_cmd(unsigned char cmd)
 void SPI_TFT_ILI9341::wr_dat(unsigned char dat)
 {
    _spi.write(dat);      // mbed lib
-//   _cs = 1;
 }
 
 
@@ -102,7 +104,7 @@ void SPI_TFT_ILI9341::wr_dat(unsigned char dat)
 
 void SPI_TFT_ILI9341::tft_reset()
 {
-    _spi.format(8,3);                 // 8 bit spi mode 3
+    _spi.format(8,3);                  // 8 bit spi mode 3
     _spi.frequency(10000000);          // 10 Mhz SPI clock
     _cs = 1;                           // cs high
     _dc = 1;                           // dc high 
@@ -674,18 +676,20 @@ void SPI_TFT_ILI9341::Bitmap(unsigned int x, unsigned int y, unsigned int w, uns
     unsigned int  j;
     int padd;
     unsigned short *bitmap_ptr = (unsigned short *)bitmap;
+    unsigned int i;
+    
     // the lines are padded to multiple of 4 bytes in a bitmap
     padd = -1;
     do {
         padd ++;
     } while (2*(w + padd)%4 != 0);
     window(x, y, w, h);
+    bitmap_ptr += ((h - 1)* (w + padd));
     wr_cmd(0x2C);  // send pixel 
     _spi.format(16,3);                            // switch to 16 bit Mode 3
-    unsigned int i;
-    for (j = 0; j < h; j++) {        //Lines
-        for (i = 0; i < w; i++) {     // copy pixel data to TFT
-            _spi.write(*bitmap_ptr);    // one line
+    for (j = 0; j < h; j++) {         //Lines
+        for (i = 0; i < w; i++) {     // one line
+            _spi.write(*bitmap_ptr);  // copy pixel data to TFT
             bitmap_ptr++;
         }
         bitmap_ptr -= 2*w;

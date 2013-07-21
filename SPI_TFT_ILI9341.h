@@ -1,5 +1,5 @@
-/* mbed library for 240*320 pixel display TFT based on HX8347D LCD Controller
- * Copyright (c) 2011 Peter Drescher - DC2PD
+/* mbed library for 240*320 pixel display TFT based on ILI9341 LCD Controller
+ * Copyright (c) 2013 Peter Drescher - DC2PD
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -57,9 +57,10 @@
  * 
  *
  *
- * // the TFT is connected to SPI pin 5-7 
+ * // the TFT is connected to SPI pin 5-7 and IO's 8-10
  * SPI_TFT_ILI9341 TFT(p5, p6, p7, p8, p9, p10,"TFT"); // mosi, miso, sclk, cs, reset, dc
- * 
+ * If your display need a signal for switch the backlight use a aditional IO pin in your program 
+ *
  * int main() {
  *     TFT.claim(stdout);      // send stdout to the TFT display 
  *     //TFT.claim(stderr);      // send stderr to the TFT display
@@ -269,10 +270,10 @@
   /** Set the orientation of the screen
    *  x,y: 0,0 is always top left 
    *
-   * @param o direction to use the screen (0-3) 90&#65533; Steps  
+   * @param o direction to use the screen (0-3)  
    *
    */  
-  //void set_orientation(unsigned int o);
+  void set_orientation(unsigned int o);
     
   SPI _spi;
   DigitalOut _cs; 
