@@ -12,6 +12,7 @@
  
 // 12.06.13 fork from SPI_TFT code because controller is different ...
 // 14.07.13 Test with real display and bugfix 
+// 18.10.13 Better Circle function from Michael Ammann
 
 #include "SPI_TFT_ILI9341.h"
 #include "mbed.h"
@@ -320,111 +321,7 @@ void SPI_TFT_ILI9341::cls (void)
 
 void SPI_TFT_ILI9341::circle(int x0, int y0, int r, int color)
 {
-#if 0
-    int draw_x0, draw_y0;
-    int draw_x1, draw_y1;
-    int draw_x2, draw_y2;
-    int draw_x3, draw_y3;
-    int draw_x4, draw_y4;
-    int draw_x5, draw_y5;
-    int draw_x6, draw_y6;
-    int draw_x7, draw_y7;
-    int xx, yy;
-    int di;
-    //WindowMax();
-    if (r == 0) {       /* no radius */
-        return;
-    }
 
-    draw_x0 = draw_x1 = x0;
-    draw_y0 = draw_y1 = y0 + r;
-    if (draw_y0 < height()) {
-        pixel(draw_x0, draw_y0, color);     /* 90 degree */
-    }
-
-    draw_x2 = draw_x3 = x0;
-    draw_y2 = draw_y3 = y0 - r;
-    if (draw_y2 >= 0) {
-        pixel(draw_x2, draw_y2, color);    /* 270 degree */
-    }
-
-    draw_x4 = draw_x6 = x0 + r;
-    draw_y4 = draw_y6 = y0;
-    if (draw_x4 < width()) {
-        pixel(draw_x4, draw_y4, color);     /* 0 degree */
-    }
-
-    draw_x5 = draw_x7 = x0 - r;
-    draw_y5 = draw_y7 = y0;
-    if (draw_x5>=0) {
-        pixel(draw_x5, draw_y5, color);     /* 180 degree */
-    }
-
-    if (r == 1) {
-        return;
-    }
-
-    di = 3 - 2*r;
-    xx = 0;
-    yy = r;
-    while (xx < yy) {
-
-        if (di < 0) {
-            di += 4*xx + 6;
-        } else {
-            di += 4*(xx - yy) + 10;
-            yy--;
-            draw_y0--;
-            draw_y1--;
-            draw_y2++;
-            draw_y3++;
-            draw_x4--;
-            draw_x5++;
-            draw_x6--;
-            draw_x7++;
-        }
-        xx++;
-        draw_x0++;
-        draw_x1--;
-        draw_x2++;
-        draw_x3--;
-        draw_y4++;
-        draw_y5++;
-        draw_y6--;
-        draw_y7--;
-
-        if ( (draw_x0 <= width()) && (draw_y0>=0) ) {
-            pixel(draw_x0, draw_y0, color);
-        }
-
-        if ( (draw_x1 >= 0) && (draw_y1 >= 0) ) {
-            pixel(draw_x1, draw_y1, color);
-        }
-
-        if ( (draw_x2 <= width()) && (draw_y2 <= height()) ) {
-            pixel(draw_x2, draw_y2, color);
-        }
-
-        if ( (draw_x3 >=0 ) && (draw_y3 <= height()) ) {
-            pixel(draw_x3, draw_y3, color);
-        }
-
-        if ( (draw_x4 <= width()) && (draw_y4 >= 0) ) {
-            pixel(draw_x4, draw_y4, color);
-        }
-
-        if ( (draw_x5 >= 0) && (draw_y5 >= 0) ) {
-            pixel(draw_x5, draw_y5, color);
-        }
-        if ( (draw_x6 <=width()) && (draw_y6 <= height()) ) {
-            pixel(draw_x6, draw_y6, color);
-        }
-        if ( (draw_x7 >= 0) && (draw_y7 <= height()) ) {
-            pixel(draw_x7, draw_y7, color);
-        }
-    }
-    return;
-#else
     int x = -r, y = 0, err = 2-2*r, e2;
     do {
         pixel(x0-x, y0+y,color);
@@ -438,16 +335,11 @@ void SPI_TFT_ILI9341::circle(int x0, int y0, int r, int color)
         }
         if (e2 > x) err += ++x*2+1;
     } while (x <= 0);
-#endif
+
 }
 
 void SPI_TFT_ILI9341::fillcircle(int x0, int y0, int r, int color)
 {
-#if 0
-    int i;
-    for (i = 0; i <= r; i++)
-        circle(x0,y0,i,color);
-#else
     int x = -r, y = 0, err = 2-2*r, e2;
     do {
         vline(x0-x, y0-y, y0+y, color);
@@ -459,7 +351,6 @@ void SPI_TFT_ILI9341::fillcircle(int x0, int y0, int r, int color)
         }
         if (e2 > x) err += ++x*2+1;
     } while (x <= 0);
-#endif
 }
 
 
