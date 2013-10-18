@@ -320,7 +320,7 @@ void SPI_TFT_ILI9341::cls (void)
 
 void SPI_TFT_ILI9341::circle(int x0, int y0, int r, int color)
 {
-
+#if 0
     int draw_x0, draw_y0;
     int draw_x1, draw_y1;
     int draw_x2, draw_y2;
@@ -424,15 +424,43 @@ void SPI_TFT_ILI9341::circle(int x0, int y0, int r, int color)
         }
     }
     return;
+#else
+    int x = -r, y = 0, err = 2-2*r, e2;
+    do {
+        pixel(x0-x, y0+y,color);
+        pixel(x0+x, y0+y,color);
+        pixel(x0+x, y0-y,color);
+        pixel(x0-x, y0-y,color);
+        e2 = err;
+        if (e2 <= y) {
+            err += ++y*2+1;
+            if (-x == y && e2 <= x) e2 = 0;
+        }
+        if (e2 > x) err += ++x*2+1;
+    } while (x <= 0);
+#endif
 }
 
-void SPI_TFT_ILI9341::fillcircle(int x, int y, int r, int color)
+void SPI_TFT_ILI9341::fillcircle(int x0, int y0, int r, int color)
 {
+#if 0
     int i;
     for (i = 0; i <= r; i++)
-        circle(x,y,i,color);
+        circle(x0,y0,i,color);
+#else
+    int x = -r, y = 0, err = 2-2*r, e2;
+    do {
+        vline(x0-x, y0-y, y0+y, color);
+        vline(x0+x, y0-y, y0+y, color);
+        e2 = err;
+        if (e2 <= y) {
+            err += ++y*2+1;
+            if (-x == y && e2 <= x) e2 = 0;
+        }
+        if (e2 > x) err += ++x*2+1;
+    } while (x <= 0);
+#endif
 }
-
 
 
 void SPI_TFT_ILI9341::hline(int x0, int x1, int y, int color)
