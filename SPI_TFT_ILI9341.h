@@ -277,7 +277,7 @@
     
   SPI _spi;
   DigitalOut _cs; 
-  DigitalOut _reset;
+  PinName _reset;
   DigitalOut _dc;
   unsigned char* font;
   

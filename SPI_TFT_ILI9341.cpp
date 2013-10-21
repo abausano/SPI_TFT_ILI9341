@@ -24,10 +24,11 @@
 //extern DigitalOut xx;     // debug !!
 
 SPI_TFT_ILI9341::SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, const char *name)
-    : _spi(mosi, miso, sclk), _cs(cs), _reset(reset), _dc(dc), GraphicsDisplay(name)
+    : _spi(mosi, miso, sclk), _cs(cs), _dc(dc), GraphicsDisplay(name)
 {
     orientation = 0;
     char_x = 0;
+    _reset = reset;
     tft_reset();
 }
 
@@ -109,10 +110,13 @@ void SPI_TFT_ILI9341::tft_reset()
     _spi.frequency(10000000);          // 10 Mhz SPI clock
     _cs = 1;                           // cs high
     _dc = 1;                           // dc high 
-    _reset = 0;                        // display reset
-
-    wait_us(50);
-    _reset = 1;                       // end hardware reset
+    if (_reset != NC)
+    {
+        DigitalOut rst(_reset);
+        rst = 0;                       // display reset
+        wait_us(50);
+        rst = 1;                       // end hardware reset
+    }
     wait_ms(5);
      
     wr_cmd(0x01);                     // SW reset  
