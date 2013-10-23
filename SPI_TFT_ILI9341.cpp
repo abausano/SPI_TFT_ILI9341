@@ -13,6 +13,7 @@
 // 12.06.13 fork from SPI_TFT code because controller is different ...
 // 14.07.13 Test with real display and bugfix 
 // 18.10.13 Better Circle function from Michael Ammann
+// 22.10.13 Fixes for Kinetis Board - 8 bit spi
 
 #include "SPI_TFT_ILI9341.h"
 #include "mbed.h"
@@ -276,10 +277,15 @@ void SPI_TFT_ILI9341::pixel(int x, int y, int color)
     _spi.write(y >> 8);
     _spi.write(y);
     _cs = 1;
-    wr_cmd(0x2C);  // send pixel 
+    wr_cmd(0x2C);  // send pixel
+    #if defined TARGET_KL25Z  // 8 Bit SPI
+    _spi.write(color >> 8);
+    _spi.write(color & 0xff);
+    #else 
     _spi.format(16,3);                            // switch to 16 bit Mode 3
     _spi.write(color);                              // Write D0..D15
     _spi.format(8,3);
+    #endif
     _cs = 1;
 }
 
@@ -313,13 +319,22 @@ void SPI_TFT_ILI9341::cls (void)
 {
     int pixel = ( width() * height());
     WindowMax();
-    wr_cmd(0x2C);  // send pixel 
+    wr_cmd(0x2C);  // send pixel
+    #if defined TARGET_KL25Z  // 8 Bit SPI
+    unsigned int i;
+    for (i = 0; i < ( width() * height()); i++){
+        _spi.write(_background >> 8);
+        _spi.write(_background & 0xff);
+        }
+    
+    #else 
     _spi.format(16,3);                            // switch to 16 bit Mode 3
     unsigned int i;
     for (i = 0; i < ( width() * height()); i++)
-        _spi.write(_background);                     
-    _cs = 1;
-    _spi.format(8,3);
+        _spi.write(_background);
+    _spi.format(8,3);    
+    #endif                         
+    _cs = 1; 
 }
 
 
@@ -363,14 +378,22 @@ void SPI_TFT_ILI9341::hline(int x0, int x1, int y, int color)
     int w;
     w = x1 - x0 + 1;
     window(x0,y,w,1);
-    wr_cmd(0x2C);  // send pixel 
+    wr_cmd(0x2C);  // send pixel
+    #if defined TARGET_KL25Z  // 8 Bit SPI
+    int j;
+    for (j=0; j<w; j++) {
+        _spi.write(color >> 8);
+        _spi.write(color & 0xff);
+    } 
+    #else 
     _spi.format(16,3);                            // switch to 16 bit Mode 3
     int j;
     for (j=0; j<w; j++) {
         _spi.write(color);
     }
-    _cs = 1;
     _spi.format(8,3);
+    #endif
+    _cs = 1;
     WindowMax();
     return;
 }
@@ -380,13 +403,20 @@ void SPI_TFT_ILI9341::vline(int x, int y0, int y1, int color)
     int h;
     h = y1 - y0 + 1;
     window(x,y0,1,h);
-    wr_cmd(0x2C);  // send pixel 
+    wr_cmd(0x2C);  // send pixel
+    #if defined TARGET_KL25Z  // 8 Bit SPI
+    for (int y=0; y<h; y++) {
+        _spi.write(color >> 8);
+        _spi.write(color & 0xff);
+    } 
+    #else 
     _spi.format(16,3);                            // switch to 16 bit Mode 3
     for (int y=0; y<h; y++) {
         _spi.write(color);
     }
-    _cs = 1;
     _spi.format(8,3);
+    #endif
+    _cs = 1;
     WindowMax();
     return;
 }
@@ -493,12 +523,19 @@ void SPI_TFT_ILI9341::fillrect(int x0, int y0, int x1, int y1, int color)
     int pixel = h * w;
     window(x0,y0,w,h);
     wr_cmd(0x2C);  // send pixel 
+    #if defined TARGET_KL25Z  // 8 Bit SPI
+    for (int p=0; p<pixel; p++) {
+        _spi.write(color >> 8);
+        _spi.write(color & 0xff);
+    }
+   #else
     _spi.format(16,3);                            // switch to 16 bit Mode 3
     for (int p=0; p<pixel; p++) {
         _spi.write(color);
     }
-    _cs = 1;
     _spi.format(8,3);
+    #endif
+    _cs = 1;
     WindowMax();
     return;
 }
@@ -563,8 +600,10 @@ void SPI_TFT_ILI9341::character(int x, int y, int c)
         }
     }
     window(char_x, char_y,hor,vert); // char box
-    wr_cmd(0x2C);  // send pixel 
-    _spi.format(16,3);                            // switch to 16 bit Mode 3
+    wr_cmd(0x2C);  // send pixel
+    #ifndef TARGET_KL25Z  // 16 Bit SPI 
+    _spi.format(16,3);   
+    #endif                         // switch to 16 bit Mode 3
     zeichen = &font[((c -32) * offset) + 4]; // start of char bitmap
     w = zeichen[0];                          // width of actual char
      for (j=0; j<vert; j++) {  //  vert line
@@ -572,14 +611,26 @@ void SPI_TFT_ILI9341::character(int x, int y, int c)
             z =  zeichen[bpl * i + ((j & 0xF8) >> 3)+1];
             b = 1 << (j & 0x07);
             if (( z & b ) == 0x00) {
+               #ifndef TARGET_KL25Z  // 16 Bit SPI 
                 _spi.write(_background);
+               #else
+                _spi.write(_background >> 8);
+                _spi.write(_background & 0xff);
+                #endif
             } else {
+                #ifndef TARGET_KL25Z  // 16 Bit SPI
                 _spi.write(_foreground);
+                #else
+                _spi.write(_foreground >> 8);
+                _spi.write(_foreground & 0xff);
+                #endif
             }
         }
     }
     _cs = 1;
+    #ifndef TARGET_KL25Z  // 16 Bit SPI
     _spi.format(8,3);
+    #endif
     WindowMax();
     if ((w + 2) < hor) {                   // x offset to next char
         char_x += w + 2;
@@ -599,6 +650,10 @@ void SPI_TFT_ILI9341::Bitmap(unsigned int x, unsigned int y, unsigned int w, uns
     unsigned int  j;
     int padd;
     unsigned short *bitmap_ptr = (unsigned short *)bitmap;
+    #if defined TARGET_KL25Z  // 8 Bit SPI
+        unsigned short pix_temp;
+    #endif
+    
     unsigned int i;
     
     // the lines are padded to multiple of 4 bytes in a bitmap
@@ -608,21 +663,35 @@ void SPI_TFT_ILI9341::Bitmap(unsigned int x, unsigned int y, unsigned int w, uns
     } while (2*(w + padd)%4 != 0);
     window(x, y, w, h);
     bitmap_ptr += ((h - 1)* (w + padd));
-    wr_cmd(0x2C);  // send pixel 
-    _spi.format(16,3);                            // switch to 16 bit Mode 3
+    wr_cmd(0x2C);  // send pixel
+    #ifndef TARGET_KL25Z  // 16 Bit SPI 
+    _spi.format(16,3);
+    #endif                            // switch to 16 bit Mode 3
     for (j = 0; j < h; j++) {         //Lines
         for (i = 0; i < w; i++) {     // one line
-            _spi.write(*bitmap_ptr);  // copy pixel data to TFT
-            bitmap_ptr++;
+            #if defined TARGET_KL25Z  // 8 Bit SPI
+                pix_temp = *bitmap_ptr;
+                _spi.write(pix_temp >> 8);
+                _spi.write(pix_temp);
+                bitmap_ptr++;
+            #else
+                _spi.write(*bitmap_ptr);    // one line
+                bitmap_ptr++;
+            #endif
         }
         bitmap_ptr -= 2*w;
         bitmap_ptr -= padd;
     }
     _cs = 1;
+    #ifndef TARGET_KL25Z  // 16 Bit SPI 
     _spi.format(8,3);
+    #endif
     WindowMax();
 }
 
+
+// local filesystem is not implemented in kinetis board
+#ifndef TARGET_KL25Z
 
 int SPI_TFT_ILI9341::BMP_16(unsigned int x, unsigned int y, const char *Name_BMP)
 {
@@ -709,3 +778,4 @@ int SPI_TFT_ILI9341::BMP_16(unsigned int x, unsigned int y, const char *Name_BMP
     WindowMax();
     return(1);
 }
+#endif
