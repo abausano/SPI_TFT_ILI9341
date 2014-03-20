@@ -25,7 +25,7 @@
 //extern DigitalOut xx;     // debug !!
 
 SPI_TFT_ILI9341::SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, const char *name)
-    : _spi(mosi, miso, sclk), _cs(cs), _dc(dc), GraphicsDisplay(name)
+    : GraphicsDisplay(name), _spi(mosi, miso, sclk), _cs(cs), _dc(dc)
 {
     orientation = 0;
     char_x = 0;
@@ -691,7 +691,7 @@ void SPI_TFT_ILI9341::Bitmap(unsigned int x, unsigned int y, unsigned int w, uns
 
 
 // local filesystem is not implemented in kinetis board
-#ifndef TARGET_KL25Z
+#if DEVICE_LOCALFILESYSTEM
 
 int SPI_TFT_ILI9341::BMP_16(unsigned int x, unsigned int y, const char *Name_BMP)
 {

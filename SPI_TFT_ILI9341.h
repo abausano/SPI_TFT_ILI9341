@@ -230,7 +230,7 @@
    */    
   void Bitmap(unsigned int x, unsigned int y, unsigned int w, unsigned int h,unsigned char *bitmap);
     
-    
+#if DEVICE_LOCALFILESYSTEM
    /** paint a 16 bit BMP from local filesytem on the TFT (slow) 
    *
    * @param x,y : upper left corner 
@@ -249,7 +249,7 @@
    */      
     
   int BMP_16(unsigned int x, unsigned int y, const char *Name_BMP);  
-    
+#endif
     
     
   /** select the font to use
