@@ -89,9 +89,10 @@
    * @param cs pin connected to CS of display
    * @param reset pin connected to RESET of display
    * @param dc pin connected to WR of display
+   * @param spiSpeed SPI Clock Frequency in Hz 
    * the IM pins have to be set to 1110 (3-0) 
    */ 
-  SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, const char* name ="TFT");
+  SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, int spiSpeed = 27000000, const char* name ="TFT");
     
   /** Get the width of the screen in pixel
    *
@@ -324,8 +325,9 @@ protected:
     
   /** Init the HX8347D controller 
    *
+   * @param spiSpeed SPI Clock Frequency in Hz 
    */    
-  void tft_reset();
+  void tft_reset(int spiSpeed);
     
    /** Write data to the LCD controller
    *

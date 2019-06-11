@@ -24,13 +24,13 @@
 //extern Serial pc;
 //extern DigitalOut xx;     // debug !!
 
-SPI_TFT_ILI9341::SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, const char *name)
+SPI_TFT_ILI9341::SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, int spiSpeed, const char *name)
     : GraphicsDisplay(name), _spi(mosi, miso, sclk), _cs(cs), _dc(dc)
 {
     orientation = 0;
     char_x = 0;
     _reset = reset;
-    tft_reset();
+    tft_reset(spiSpeed);
 }
 
 int SPI_TFT_ILI9341::width()
@@ -105,10 +105,10 @@ void SPI_TFT_ILI9341::wr_dat(unsigned char dat)
 
 // Init code based on MI0283QT datasheet
 
-void SPI_TFT_ILI9341::tft_reset()
+void SPI_TFT_ILI9341::tft_reset(int spiSpeed)
 {
     _spi.format(8,3);                  // 8 bit spi mode 3
-    _spi.frequency(10000000);          // 10 Mhz SPI clock
+    _spi.frequency(spiSpeed);          // SPI clock
     _cs = 1;                           // cs high
     _dc = 1;                           // dc high 
     if (_reset != NC)
