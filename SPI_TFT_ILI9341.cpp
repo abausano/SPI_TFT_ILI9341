@@ -118,10 +118,20 @@ void SPI_TFT_ILI9341::tft_reset(int spiSpeed)
         wait_us(50);
         rst = 1;                       // end hardware reset
     }
-    wait_ms(5);
+    #if (MBED_MAJOR_VERSION != 2)
+        ThisThread::sleep_for(5ms);
+    #else
+        wait_ms(5);        
+    #endif    
      
-    wr_cmd(0x01);                     // SW reset  
-    wait_ms(5);
+    wr_cmd(0x01);                     // SW reset 
+    
+    #if (MBED_MAJOR_VERSION != 2)
+        ThisThread::sleep_for(5ms);
+    #else
+        wait_ms(5);        
+    #endif        
+    
     wr_cmd(0x28);                     // display off  
 
     /* Start Initial Sequence ----------------------------------------------------*/
@@ -257,13 +267,20 @@ void SPI_TFT_ILI9341::tft_reset(int spiSpeed)
      wr_cmd(0x11);                     // sleep out
      _cs = 1;
      
-     wait_ms(100);
+    #if (MBED_MAJOR_VERSION != 2)
+        ThisThread::sleep_for(100ms);
+    #else
+        wait_ms(100);        
+    #endif         
      
      wr_cmd(0x29);                     // display on
      _cs = 1;
      
-     wait_ms(100);
-     
+    #if (MBED_MAJOR_VERSION != 2)
+        ThisThread::sleep_for(100ms);
+    #else
+        wait_ms(100);        
+    #endif     
  }
 
 
