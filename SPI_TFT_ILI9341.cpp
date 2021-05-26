@@ -107,7 +107,7 @@ void SPI_TFT_ILI9341::wr_dat(unsigned char dat)
 
 void SPI_TFT_ILI9341::tft_reset(int spiSpeed)
 {
-    _spi.format(8,3);                  // 8 bit spi mode 3
+    _spi.format(8,0);                  // 8 bit spi mode 0
     _spi.frequency(spiSpeed);          // SPI clock
     _cs = 1;                           // cs high
     _dc = 1;                           // dc high 
@@ -299,9 +299,9 @@ void SPI_TFT_ILI9341::pixel(int x, int y, int color)
     _spi.write(color >> 8);
     _spi.write(color & 0xff);
     #else 
-    _spi.format(16,3);                            // switch to 16 bit Mode 3
+    _spi.format(16,0);                              // switch to 16 bit Mode 0
     _spi.write(color);                              // Write D0..D15
-    _spi.format(8,3);
+    _spi.format(8,0);
     #endif
     _cs = 1;
 }
@@ -345,11 +345,11 @@ void SPI_TFT_ILI9341::cls (void)
         }
     
     #else 
-    _spi.format(16,3);                            // switch to 16 bit Mode 3
+    _spi.format(16,0);                            // switch to 16 bit Mode 0
     unsigned int i;
     for (i = 0; i < ( width() * height()); i++)
         _spi.write(_background);
-    _spi.format(8,3);    
+    _spi.format(8,0);    
     #endif                         
     _cs = 1; 
 }
@@ -403,12 +403,12 @@ void SPI_TFT_ILI9341::hline(int x0, int x1, int y, int color)
         _spi.write(color & 0xff);
     } 
     #else 
-    _spi.format(16,3);                            // switch to 16 bit Mode 3
+    _spi.format(16,0);                            // switch to 16 bit Mode 0
     int j;
     for (j=0; j<w; j++) {
         _spi.write(color);
     }
-    _spi.format(8,3);
+    _spi.format(8,0);
     #endif
     _cs = 1;
     WindowMax();
@@ -427,11 +427,11 @@ void SPI_TFT_ILI9341::vline(int x, int y0, int y1, int color)
         _spi.write(color & 0xff);
     } 
     #else 
-    _spi.format(16,3);                            // switch to 16 bit Mode 3
+    _spi.format(16,0);                            // switch to 16 bit Mode 0
     for (int y=0; y<h; y++) {
         _spi.write(color);
     }
-    _spi.format(8,3);
+    _spi.format(8,0);
     #endif
     _cs = 1;
     WindowMax();
@@ -546,11 +546,11 @@ void SPI_TFT_ILI9341::fillrect(int x0, int y0, int x1, int y1, int color)
         _spi.write(color & 0xff);
     }
    #else
-    _spi.format(16,3);                            // switch to 16 bit Mode 3
+    _spi.format(16,0);                            // switch to 16 bit Mode 0
     for (int p=0; p<pixel; p++) {
         _spi.write(color);
     }
-    _spi.format(8,3);
+    _spi.format(8,0);
     #endif
     _cs = 1;
     WindowMax();
@@ -619,8 +619,8 @@ void SPI_TFT_ILI9341::character(int x, int y, int c)
     window(char_x, char_y,hor,vert); // char box
     wr_cmd(0x2C);  // send pixel
     #ifndef TARGET_KL25Z  // 16 Bit SPI 
-    _spi.format(16,3);   
-    #endif                         // switch to 16 bit Mode 3
+    _spi.format(16,0);   
+    #endif                         // switch to 16 bit Mode 0
     zeichen = &font[((c -32) * offset) + 4]; // start of char bitmap
     w = zeichen[0];                          // width of actual char
      for (j=0; j<vert; j++) {  //  vert line
@@ -646,7 +646,7 @@ void SPI_TFT_ILI9341::character(int x, int y, int c)
     }
     _cs = 1;
     #ifndef TARGET_KL25Z  // 16 Bit SPI
-    _spi.format(8,3);
+    _spi.format(8,0);
     #endif
     WindowMax();
     if ((w + 2) < hor) {                   // x offset to next char
@@ -682,8 +682,8 @@ void SPI_TFT_ILI9341::Bitmap(unsigned int x, unsigned int y, unsigned int w, uns
     bitmap_ptr += ((h - 1)* (w + padd));
     wr_cmd(0x2C);  // send pixel
     #ifndef TARGET_KL25Z  // 16 Bit SPI 
-    _spi.format(16,3);
-    #endif                            // switch to 16 bit Mode 3
+    _spi.format(16,0);
+    #endif                            // switch to 16 bit Mode 0
     for (j = 0; j < h; j++) {         //Lines
         for (i = 0; i < w; i++) {     // one line
             #if defined TARGET_KL25Z  // 8 Bit SPI
@@ -701,7 +701,7 @@ void SPI_TFT_ILI9341::Bitmap(unsigned int x, unsigned int y, unsigned int w, uns
     }
     _cs = 1;
     #ifndef TARGET_KL25Z  // 16 Bit SPI 
-    _spi.format(8,3);
+    _spi.format(8,0);
     #endif
     WindowMax();
 }
