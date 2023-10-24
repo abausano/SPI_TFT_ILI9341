@@ -17,6 +17,14 @@
 #ifndef MBED_SPI_TFT_ILI9341_H
 #define MBED_SPI_TFT_ILI9341_H
 
+//#define ADA_TFT
+//#define SEEED_TFT
+//#define PARA_TFT 
+
+#define PARA_TFT_    1
+#define SEEED_TFT_   2
+#define ADA_TFT_    3
+
 #include "mbed.h"
 #include "GraphicsDisplay.h"
 
@@ -92,8 +100,16 @@
    * @param spiSpeed SPI Clock Frequency in Hz 
    * the IM pins have to be set to 1110 (3-0) 
    */ 
-  SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, int spiSpeed = 27000000, const char* name ="TFT");
-    
+
+ 
+    //#ifdef PARA_TFT
+        SPI_TFT_ILI9341(PinName TFT_D0, PinName TFT_D1, PinName TFT_D2, PinName TFT_D3, PinName TFT_D4, PinName TFT_D5,
+        PinName TFT_D6, PinName TFT_D7, PinName rd, PinName wr, PinName cs, PinName dc, PinName res, const char* name);  // ="TFT");
+    //#else
+        SPI_TFT_ILI9341(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName reset, PinName dc, int spiSpeed = 27000000, const char* name ="TFT");
+    //#endif
+
+
   /** Get the width of the screen in pixel
    *
    * @param 
@@ -231,28 +247,7 @@
    */    
   void Bitmap(unsigned int x, unsigned int y, unsigned int w, unsigned int h,unsigned char *bitmap);
     
-#if DEVICE_LOCALFILESYSTEM
-   /** paint a 16 bit BMP from local filesytem on the TFT (slow) 
-   *
-   * @param x,y : upper left corner 
-   * @param *Name_BMP name of the BMP file
-   * @returns 1 if bmp file was found and painted
-   * @returns -1 if bmp file was found not found
-   * @returns -2 if bmp file is not 16bit
-   * @returns -3 if bmp file is to big for screen 
-   * @returns -4 if buffer malloc go wrong
-   *
-   *   bitmap format: 16 bit R5 G6 B5
-   * 
-   *   use Gimp to create / load , save as BMP, option 16 bit R5 G6 B5
-   *   copy to internal file system            
-   * 
-   */      
-    
-  int BMP_16(unsigned int x, unsigned int y, const char *Name_BMP);  
-#endif
-    
-    
+
   /** select the font to use
    *
    * @param f pointer to font array 
@@ -275,16 +270,32 @@
    *
    */  
   void set_orientation(unsigned int o);
+
+//#ifdef PARA_TFT
+    DigitalOut _TFT_D0;
+    DigitalOut _TFT_D1;
+    DigitalOut _TFT_D2;
+    DigitalOut _TFT_D3;
+    DigitalOut _TFT_D4;
+    DigitalOut _TFT_D5;
+    DigitalOut _TFT_D6;
+    DigitalOut _TFT_D7;
+    DigitalOut _rd;
+    DigitalOut _wr; 
+    DigitalOut _res;   
+
+//#else
+    SPI _spi;
+    PinName _reset;
+//#endif
+
+    DigitalOut _cs; 
+    DigitalOut _dc;
     
-  SPI _spi;
-  DigitalOut _cs; 
-  PinName _reset;
-  DigitalOut _dc;
-  unsigned char* font;
-  
-  
-  
-   
+    unsigned char* font;
+
+    int iTypeTFT;
+
 protected:
 
   /** Set draw window region to whole screen
@@ -334,8 +345,8 @@ protected:
    * @param dat data written to LCD controller
    * 
    */   
-  //void wr_dat(unsigned int value);
   void wr_dat(unsigned char value);
+
     
   /** Write a command the LCD controller 
    *
